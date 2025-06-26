@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+.venv/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Environment variables
+.env
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Project specific
+*.json
+ai_pm_handbook_structure_analysis.json
+law_of_success_structure_analysis.json
+
+# Claude AI
+.claude/
+
+# Test outputs
+test_output/
+temp/
+
+# Large book files - exclude all books
+books/
+
+# Processed outputs - exclude all processed chapters
+book_chapters/
+test_chapters_clean_section/

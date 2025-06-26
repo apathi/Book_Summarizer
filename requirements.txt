@@ -1,0 +1,36 @@
+# Book Summarizer Project Dependencies
+# Install with: pip install -r requirements.txt
+
+# Core PDF/EPUB Processing
+PyPDF2>=3.0.1              # PDF text extraction and manipulation
+pdfplumber>=0.7.6           # Advanced PDF text extraction with layout
+ebooklib>=0.18              # EPUB file processing
+beautifulsoup4>=4.12.2      # HTML parsing for EPUB content
+pathlib2>=2.3.7             # Path handling (Python 3.4+ compatibility)
+
+# AI Summarization APIs
+openai>=1.0.0               # OpenAI ChatGPT API client
+anthropic>=0.7.0            # Anthropic Claude API client
+
+# Environment Management
+python-dotenv>=1.0.0        # Load environment variables from .env files
+
+# HTML to PDF Conversion
+playwright>=1.40.0          # Modern browser automation for HTML→PDF
+# weasyprint>=60.0           # Alternative PDF generation (optional, has complex dependencies)
+
+# Image Processing (for EPUB images)
+Pillow>=10.0.0              # Image processing and manipulation
+
+# Utility Libraries
+typing-extensions>=4.8.0    # Enhanced type hints
+pathlib>=1.0.1              # Modern path handling
+
+# Optional: Enhanced PDF Processing
+pymupdf>=1.23.0             # Alternative PDF processing (optional)
+# fitz>=0.0.1               # PyMuPDF alias (included with pymupdf)
+
+# Development Dependencies (optional)
+# pytest>=7.4.0            # Testing framework
+# black>=23.9.0             # Code formatting
+# flake8>=6.0.0             # Linting
