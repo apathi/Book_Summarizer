@@ -1,13 +1,78 @@
 # 📚 BookSummarizer - AI-Powered Book Chapter Extraction & Summarization
 
+<div align="center">
+
+![Python](https://img.shields.io/badge/Python-3.12+-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o-412991?style=for-the-badge&logo=openai&logoColor=white)
+![Anthropic](https://img.shields.io/badge/Anthropic-Claude--3.5-191919?style=for-the-badge)
+![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
+![AI Powered](https://img.shields.io/badge/AI-Powered-FF6B6B?style=for-the-badge)
+![PDF](https://img.shields.io/badge/PDF-Supported-DC143C?style=flat-square&logo=adobeacrobatreader&logoColor=white)
+![EPUB](https://img.shields.io/badge/EPUB-Supported-1E90FF?style=flat-square)
+![PyPDF2](https://img.shields.io/badge/PyPDF2-3.0+-DC143C?style=flat-square)
+![PyMuPDF](https://img.shields.io/badge/PyMuPDF-1.23+-9370DB?style=flat-square)
+![ebooklib](https://img.shields.io/badge/ebooklib-0.18+-1E90FF?style=flat-square)
+![Playwright](https://img.shields.io/badge/Playwright-1.40+-45ba4b?style=flat-square&logo=playwright&logoColor=white)
+![BeautifulSoup](https://img.shields.io/badge/BeautifulSoup4-4.12+-FFD700?style=flat-square)
+![Pillow](https://img.shields.io/badge/Pillow-10.0+-00BFFF?style=flat-square)
+
+</div>
+
 > **Transform books into structured chapters and AI-powered study guides**
 
-A comprehensive Python system for processing PDF and EPUB books by extracting individual chapters and generating AI-powered study summaries using ChatGPT and Claude APIs.
+A Python system for processing PDF and EPUB books by extracting individual chapters and generating AI-powered study summaries using ChatGPT and Claude APIs.
+
+---
+
+## 💼 Technical Skills Showcase
+
+### 🤖 AI/ML Engineering
+- **Multi-LLM Integration**: Dual AI provider architecture (OpenAI GPT-4o + Anthropic Claude-3.5-Sonnet)
+- **Prompt Engineering**: Sophisticated prompt templates with structured output formatting for study guide generation
+- **Large Context Optimization**: Handles 120K-180K token contexts with intelligent content validation
+- **Token Budget Management**: Dynamic content length validation and truncation strategies
+- **Temperature Tuning**: Optimized for consistent, factual outputs (temp=0.1)
+- **API Security**: Environment-based credential management, zero hardcoded secrets
+
+### 🏗️ Software Architecture & Design Patterns
+- **Orchestrator Pattern**: Ultra-minimal 45-line main orchestrator with specialized processors
+- **Dependency Injection**: Clean separation of concerns across 9 specialized modules
+- **Factory Pattern**: Dynamic processor selection based on file format detection
+- **Strategy Pattern**: Pluggable AI providers with consistent interface
+- **Modular Design**: 3,612 LOC across 14 modules with single-responsibility principle
+- **Clean Code**: Type hints, comprehensive docstrings, PEP 8 compliance
+
+### 📊 Document Processing & Data Engineering
+- **Multi-Format Parsing**: PDF (PyPDF2, pdfplumber, PyMuPDF) and EPUB (ebooklib) processing
+- **HTML Parsing**: BeautifulSoup4 for EPUB content extraction and cleaning
+- **TOC Algorithms**: Custom table-of-contents parsing with multi-page support
+- **Chapter Detection**: Intelligent boundary detection with section hierarchy analysis
+- **Image Preservation**: EPUB image extraction and PDF conversion pipeline
+- **Browser Automation**: Playwright-based HTML→PDF conversion with image retention
+- **Batch Processing**: Recursive directory traversal with parallel processing capability
+
+### 🔧 DevOps & Quality Assurance
+- **Regression Testing**: Custom test framework with baseline comparisons (test_regression.py)
+- **CI/CD Ready**: Proper exit codes, automated testing, version control integration
+- **Error Handling**: Comprehensive validation with user-friendly error messages
+- **Logging System**: Verbose mode for debugging and production monitoring
+- **Documentation**: 6 comprehensive guides (Architecture, Technical Specs, Installation, Usage, Troubleshooting)
+- **Report Generation**: Automated JSON reports with processing metadata and statistics
+
+### 🛠️ Full-Stack Development Skills
+- **CLI Development**: Argparse-based interface with batch mode and recursive processing
+- **File System Operations**: Cross-platform path handling, directory management, cleanup
+- **Environment Management**: python-dotenv for configuration, .env file support
+- **Image Processing**: Pillow for format conversion and manipulation
+- **Markdown Generation**: Dynamic study guide creation with Notion-compatible formatting
+- **API Integration**: RESTful API consumption with proper error handling and retry logic
+
+---
 
 ## ✨ Book Summarizer - Key Highlights
 
-- **PDF Processing**: Extract chapters from PDFs with table of contents parsing
-- **EPUB Support**: Process EPUB books with image preservation and smart chapter detection
+- 📄 **PDF Processing**: Extract chapters from PDFs with table of contents parsing
+- 📚 **EPUB Support**: Process EPUB books with image preservation and smart chapter detection
 - 🎯 **Production-Ready**: Comprehensive regression testing with baselines for backward compatibility
 - 🧠 **Dual AI Support**: Generate study guides using ChatGPT (120K context) & Claude (180K context)
 - 📊 **Smart Processing**: 8-step PDF workflow, 4-step EPUB workflow with intelligent detection
