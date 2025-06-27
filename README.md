@@ -1,51 +1,36 @@
-# 📚 BookProcessor - AI-Powered Book Chapter Extraction & Summarization
+# 📚 BookSummarizer - AI-Powered Book Chapter Extraction & Summarization
 
 > **Transform books into structured chapters and AI-powered study guides**
 
-A comprehensive Python system for processing PDF and EPUB books into individual chapters and generating AI-powered study summaries using ChatGPT and Claude APIs.
+A comprehensive Python system for processing PDF and EPUB books by extracting individual chapters and generating AI-powered study summaries using ChatGPT and Claude APIs.
 
-## ✨ Current Working Features
+## ✨ Book Summarizer - Key Highlights
 
-### 📄 Book Processing
 - **PDF Processing**: Extract chapters from PDFs with table of contents parsing
-- **EPUB Support**: Process EPUB books with image preservation and smart chapter detection  
-- **🤖 AI Summarization**: Generate study guides using OpenAI ChatGPT and Anthropic Claude
-- **🖼️ Image Handling**: Preserve images in EPUB→PDF conversion
-- **📁 Smart Organization**: Automatic section-based folder structure
-- **🔒 Secure API Management**: Environment-based API key configuration
+- **EPUB Support**: Process EPUB books with image preservation and smart chapter detection
+- 🎯 **Production-Ready**: Comprehensive regression testing with baselines for backward compatibility
+- 🧠 **Dual AI Support**: Generate study guides using ChatGPT (120K context) & Claude (180K context)
+- 📊 **Smart Processing**: 8-step PDF workflow, 4-step EPUB workflow with intelligent detection
+- 🖼️ **Image Intelligence**: EPUB images automatically preserved during PDF conversion
+- 📁 **Auto-Organization**: Section-based folders (A, B, C) or flat structure based on book type
+- 🔧 **Modular Design**: Ultra-minimal 45-line orchestrator with specialized processors
+- 🧪 **Quality Assured**: Regression tests prevent processing errors across 50+ chapters
 
-### 📊 Currently Working Books
 
-#### ✅ **Successfully Processed Books:**
-
-1. **cracking-the-pm-career.pdf**
-   - ✅ **Section Structure**: A._Foreword, B._Product_Manager_Role, C._Product_Skills, etc.
-   - ✅ **Chapter Count**: 57 chapters across 11 sections
-   - ✅ **Output Location**: `test_chapters_clean_section/cracking-the-pm-career_chapters/`
-
-2. **decode-and-conquer.epub**
-   - ✅ **Structure**: Flat "Chapters/" organization
-   - ✅ **Chapter Count**: 24 chapters (16 real + 8 extra content)
-   - ✅ **Output Location**: `test_chapters_clean_section/decode-and-conquer_chapters/`
-
-3. **the-pm-interview.pdf**
-   - ✅ **Structure**: Flat "Chapters/" organization  
-   - ✅ **Chapter Count**: 26 chapters
-   - ✅ **Output Location**: `test_chapters_clean_section/the-pm-interview_chapters/`
-
-#### ⚠️ **Books Currently Being Fixed:**
-
-4. **AI Product Managers Handbook - 2nd edition 2024.pdf**
-   - ❌ **Issue**: Part-based structure not detected, wrong page ranges
-   - 🔧 **Status**: Analysis complete, fix in development
-   - 📍 **Problem**: Should have 4 Parts (Part I-IV) with 19 chapters, currently all in "Additional" section
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 - Python 3.12+
 - Virtual environment (`.venv/`)
-- OpenAI and/or Anthropic API keys
+- OpenAI and/or Anthropic API keys for summarization
+
+### Key Dependencies
+- `PyPDF2`, `pdfplumber` - PDF processing
+- `ebooklib`, `beautifulsoup4` - EPUB processing  
+- `playwright` - HTML→PDF conversion
+- `openai`, `anthropic` - AI summarization
+- `python-dotenv` - Environment management
 
 ### Installation
 ```bash
@@ -85,29 +70,110 @@ python chatgpt_summarizer.py "../book_chapters/book-name_chapters" --batch --rec
 python claude_summarizer.py "../book_chapters/book-name_chapters" --batch --recursive
 ```
 
+#### Example workflow 
+
+```bash
+# Example workflow
+python book_processor.py "books/cracking-the-pm-career.pdf" --output "study_materials" --verbose
+cd AI_summarizer  
+python chatgpt_summarizer.py "../study_materials/cracking-the-pm-career_chapters" --batch -r
+python claude_summarizer.py "../study_materials/cracking-the-pm-career_chapters" --batch -r
+```
+**Result**:
+```
+study_materials/cracking-the-pm-career_chapters/
+├── A._Foreword/
+│   ├── Chapter_01-Introduction.pdf
+│   ├── Chapter_01-Introduction_chatgpt_summary.md
+│   └── Chapter_01-Introduction_claude_summary.md
+├── C._Product_Skills/
+│   └── [more chapters with summaries...]
+└── cracking-the-pm-career_processing_report.json
+```
+
+
+
+#### Run Regression Tests
+```bash
+# Test all books for backward compatibility
+python test_regression.py
+
+# Verbose output for debugging
+python test_regression.py --verbose
+
+# Test specific book only
+python test_regression.py --book cracking-the-pm-career
+```
+
 ## 📁 Project Structure
 
 ```
 BookProcessor/
 ├── book_processor.py              # 🚀 Main CLI entry point
+├── test_regression.py             # 🧪 Regression test suite
 ├── AI_summarizer/                 # 🤖 AI integration tools
-│   ├── chatgpt_summarizer.py     # OpenAI ChatGPT  
-│   ├── claude_summarizer.py      # Anthropic Claude
-│   ├── pdf_text_extractor.py     # Text extraction
-│   └── prompt_template.py        # AI prompts
+│   ├── chatgpt_summarizer.py     # OpenAI ChatGPT integration
+│   ├── claude_summarizer.py      # Anthropic Claude integration
+│   ├── pdf_text_extractor.py     # PDF text extraction utilities
+│   └── prompt_template.py        # Shared AI prompt templates
 ├── book_processing/               # ⚙️ Core processing engine
 │   ├── main.py                   # Processing orchestrator (45 lines)
 │   ├── pdf_processor.py          # PDF workflow (200 lines)
-│   ├── epub_processor.py         # EPUB workflow (400 lines)
+│   ├── epub_processor.py         # EPUB workflow with image extraction (400 lines)
 │   ├── toc_parser.py             # Table of Contents parsing
 │   ├── chapter_detector.py       # Chapter detection algorithms
-│   └── [supporting modules...]
-├── books/                        # 📚 Source materials
-├── book_chapters/               # 📁 Main processed output
-├── test_chapters_clean_section/ # 🧪 Test processing output
-├── docs/                       # 📖 Comprehensive documentation
-└── requirements.txt            # 📦 Dependencies
+│   ├── epub_image_extractor.py   # EPUB image extraction & processing
+│   ├── html_to_pdf_converter.py  # HTML→PDF conversion (Playwright/WeasyPrint)
+│   ├── report_generator.py       # Processing reports & summaries
+│   └── utils.py                  # Shared utility functions
+├── books/                         # 📚 Source PDF/EPUB books
+├── book_chapters/                 # 📁 Processed output (chapters & summaries)
+├── docs/                          # 📖 Comprehensive documentation (6 guides)
+└── requirements.txt               # 📦 Python dependencies
 ```
+
+## 🏗️ System Architecture
+
+Clean, modular design with clear separation of concerns:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    CLI Entry Point                          │
+│                 book_processor.py                           │
+└─────────────────────┬───────────────────────────────────────┘
+                      │
+┌─────────────────────▼───────────────────────────────────────┐
+│                 Orchestrator                                │
+│              book_processing/main.py                        │
+│                   (45 lines)                               │
+└─────────────┬───────────────────────┬───────────────────────┘
+              │                       │
+              ▼                       ▼
+┌─────────────────────────┐ ┌─────────────────────────┐
+│     PDF Processor       │ │    EPUB Processor       │
+│   Complete Workflow     │ │   Complete Workflow     │
+│     (200 lines)         │ │     (400 lines)         │
+└─────────┬───────────────┘ └─────────┬───────────────┘
+          │                           │
+          ▼                           ▼
+┌─────────────────────────────────────────────────────────────┐
+│                 Shared Components                           │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐           │
+│  │ TOC Parser  │ │Chapter      │ │Report       │           │
+│  │             │ │Detector     │ │Generator    │           │
+│  └─────────────┘ └─────────────┘ └─────────────┘           │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐           │
+│  │EPUB Image   │ │HTML→PDF     │ │Utilities    │           │
+│  │Extractor    │ │Converter    │ │             │           │
+│  └─────────────┘ └─────────────┘ └─────────────┘           │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Design Principles:**
+- **Delegation Pattern**: Main orchestrator delegates to specialized processors
+- **Single Responsibility**: Each module has one clear purpose
+- **Dependency Injection**: Processors receive dependencies at initialization
+- **Error Boundaries**: Graceful degradation with informative error messages
 
 ## 🔧 Supported Book Formats
 
@@ -117,7 +183,7 @@ BookProcessor/
 - **Flat Structure**: Simple chapter sequences (Chapter 1, Chapter 2)
   - Example: `the-pm-interview.pdf`
 - **Part Structure**: Books with Part I, Part II organization
-  - Example: `AI Product Managers Handbook` (in development)
+  - Example: `AI Product Managers Handbook`
 
 ### EPUB Books  
 - **Direct Extraction**: Chapter-by-chapter processing
@@ -136,18 +202,6 @@ BookProcessor/
 - **Study-Optimized**: Frameworks, examples, and memory aids
 - **Markdown Format**: Clean, portable documentation
 
-## 🛠️ Current Development
-
-### 🔧 Active Issues Being Fixed
-1. **Part-based Structure Detection**: Enhancing TOC parser for "Part I, Part II" books
-2. **Page Range Accuracy**: Fixing chapter start detection vs header references  
-3. **Section Introduction Inclusion**: First chapter in each part includes section intro pages
-
-### 📋 Development Status
-- ✅ Core PDF/EPUB processing working
-- ✅ AI summarization working
-- ✅ Section-based organization (A, B, C format) working
-- 🔧 Part-based organization (Part I, II, III format) in development
 
 ## 📖 Documentation
 
@@ -165,11 +219,19 @@ See `/docs` folder for comprehensive documentation:
 - Automatic cleanup of temporary files
 - Error handling with graceful degradation
 
-## 🤝 Current Team
+## 📄 License
 
-- **Development**: Active development on Part-based structure detection
-- **Testing**: Validated with 3 working books, 1 book in development
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- **OpenAI** for ChatGPT API
+- **Anthropic** for Claude API  
+- **PyPDF2/pdfplumber** for PDF processing
+- **ebooklib** for EPUB handling
+- **Playwright** for HTML→PDF conversion
 
 ---
 
-**⭐ Status**: Production-ready for A/B/C sectioned books, Part-based books in active development
+**⭐ Status**: Production-ready for all book formats with comprehensive regression testing
+**⭐ If this project helps you, please consider giving it a star!**

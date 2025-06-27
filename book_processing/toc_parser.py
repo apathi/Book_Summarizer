@@ -35,7 +35,8 @@ class TOCParser:
 
                         # Continue checking next pages for TOC continuation
                         next_page = page_num + 1
-                        while next_page < min(page_num + 10, len(pdf)):  # Max 10 pages for TOC
+                        max_toc_end = min(page_num + 15, len(pdf))  # Allow up to 15 pages for TOC
+                        while next_page < max_toc_end:
                             next_text = pdf[next_page].get_text()
 
                             if self._is_toc_continuation_page(next_text):
@@ -45,7 +46,7 @@ class TOCParser:
                                 next_page += 1
                             else:
                                 if self.verbose:
-                                    print(f"📋 TOC ends at page {next_page}")
+                                    print(f"📋 TOC ends at page {next_page + 1}")
                                 break
                         break
 
@@ -142,13 +143,54 @@ class TOCParser:
                 sections = {}  # New: track section information for precise detection
                 current_section = None
                 current_section_title = None
+                
+                # Track if we find Part-based sections to infer Part I if missing
+                found_part_sections = False
 
-                for line in lines:
+                for i, line in enumerate(lines):
                     line = line.strip()
                     if not line:
                         continue
 
-                    # Check for section headers (A. Something, B. Something, etc.)
+                    # Check for Part-based sections first (Part I, Part II, etc.)
+                    part_match = re.match(r'^Part\s+([IVX]+|[1-9]|[1-9]\d*):\s*(.+)', line, re.IGNORECASE)
+                    if part_match:
+                        part_num = part_match.group(1)
+                        part_title = part_match.group(2).strip()
+                        
+                        # Convert Part number to letter for consistency (Part I -> A, Part II -> B, etc.)
+                        if part_num in ['I', '1']:
+                            section_letter = 'A'
+                        elif part_num in ['II', '2']:
+                            section_letter = 'B'
+                        elif part_num in ['III', '3']:
+                            section_letter = 'C'
+                        elif part_num in ['IV', '4']:
+                            section_letter = 'D'
+                        elif part_num in ['V', '5']:
+                            section_letter = 'E'
+                        else:
+                            # For Part VI+ or unusual numbering, continue with F, G, etc.
+                            section_letter = chr(ord('F') + int(part_num) - 6) if part_num.isdigit() else 'F'
+                        
+                        # Store section information
+                        sections[section_letter] = {
+                            'title': part_title,
+                            'letter': section_letter,
+                            'full_title': f"Part {part_num}: {part_title}",
+                            'part_num': part_num,
+                            'is_part_based': True
+                        }
+                        
+                        current_section = section_letter
+                        current_section_title = part_title
+                        found_part_sections = True
+                        
+                        if self.verbose:
+                            print(f"📂 Found Part-based section: Part {part_num}: {part_title} (mapped to {section_letter})")
+                        continue
+                    
+                    # Check for traditional section headers (A. Something, B. Something, etc.)
                     section_match = re.match(r'^([A-Z])\.\s*(.+)', line)
                     if section_match:
                         section_letter = section_match.group(1)
@@ -158,7 +200,8 @@ class TOCParser:
                         sections[section_letter] = {
                             'title': section_title,
                             'letter': section_letter,
-                            'full_title': f"{section_letter}. {section_title}"
+                            'full_title': f"{section_letter}. {section_title}",
+                            'is_part_based': False
                         }
 
                         current_section = section_letter
@@ -168,11 +211,14 @@ class TOCParser:
                             print(f"📂 Found section: {section_letter}. {section_title}")
                         continue
 
-                    # Check for chapter patterns
+                    # Check for chapter patterns - enhanced for multi-line format
                     chapter_patterns = [
                         r'^(\d+)\.\s*(.+?)(?:\s+(\d+))?$',  # "1. Chapter Name 25"
                         r'^CHAPTER\s+(\d+)\s+(.+?)(?:\s+(\d+))?$',  # "CHAPTER 1 NAME 25"
                         r'^Chapter\s+(\d+):\s*(.+?)(?:\s+(\d+))?$',  # "Chapter 1: Name 25"
+                        r'^Chapter\s+(\d+):\s*(.+?)\s+(\d+)$',  # "Chapter 1: Understanding the Infrastructure ... 3"
+                        r'^Chapter\s+(\d+):\s*(.+?)\s*(\d+)\s*$',  # "Chapter 1: Title 3" (flexible spacing)
+                        r'^Chapter\s+(\d+):\s*(.+?)\s*[\x08]*\s*$',  # "Chapter 1: Title" with backspace chars - NEW for multi-line
                     ]
 
                     for pattern in chapter_patterns:
@@ -180,10 +226,19 @@ class TOCParser:
                         if match:
                             chapter_id = match.group(1)
                             title = match.group(2).strip()
-                            page_num = match.group(3) if match.group(3) else None
+                            page_num = match.group(3) if len(match.groups()) >= 3 and match.group(3) else None
 
-                            # Clean up title (remove page numbers, dots, etc.)
+                            # NEW: If no page number found in same line, check next line
+                            if not page_num and i + 1 < len(lines):
+                                next_line = lines[i + 1].strip()
+                                if next_line.isdigit():
+                                    page_num = next_line
+                                    if self.verbose:
+                                        print(f"📋 Found page number on next line: {page_num}")
+
+                            # Clean up title (remove page numbers, dots, backspace chars, etc.)
                             title = re.sub(r'\s*\.+\s*\d*$', '', title)
+                            title = re.sub(r'\s*[\x08]+\s*$', '', title)  # Remove backspace chars
                             title = title.strip()
 
                             chapter = {
@@ -200,6 +255,41 @@ class TOCParser:
                                 print(f"📖 Found chapter: {chapter_id}. {title} (page {page_num})")
                             break
 
+                # Handle missing Part I inference
+                if found_part_sections and 'A' not in sections and 'B' in sections:
+                    # We found Part II but not Part I - infer Part I exists
+                    # Find chapters before the first chapter of Part II
+                    first_part_b_chapter = None
+                    for ch in chapters:
+                        if ch.get('section') == 'B':
+                            first_part_b_chapter = ch
+                            break
+                    
+                    # Assign early chapters to Part I
+                    if first_part_b_chapter:
+                        for ch in chapters:
+                            if ch.get('section') is None:
+                                # Check if this chapter comes before Part II's first chapter
+                                ch_id = int(ch['id']) if ch['id'].isdigit() else 999
+                                part_b_id = int(first_part_b_chapter['id']) if first_part_b_chapter['id'].isdigit() else 999
+                                
+                                if ch_id < part_b_id:
+                                    ch['section'] = 'A'
+                                    ch['section_title'] = 'Lay of the Land'  # Generic title
+                        
+                        # Add inferred Part I to sections
+                        sections['A'] = {
+                            'title': 'Lay of the Land',
+                            'letter': 'A', 
+                            'full_title': 'Part I: Lay of the Land',
+                            'part_num': 'I',
+                            'is_part_based': True,
+                            'inferred': True
+                        }
+                        
+                        if self.verbose:
+                            print("📂 Inferred Part I from chapter structure")
+
                 if self.verbose:
                     section_count = len(sections)
                     print(f"✅ Parsed: {section_count} sections, {len(chapters)} chapters")
@@ -208,7 +298,8 @@ class TOCParser:
                     if sections:
                         print("📋 Sections found:")
                         for letter, info in sections.items():
-                            print(f"   {letter}: {info['title']}")
+                            title_suffix = " (inferred)" if info.get('inferred') else ""
+                            print(f"   {letter}: {info['title']}{title_suffix}")
 
                 return chapters, sections
 

@@ -286,12 +286,12 @@ class ChapterDetector:
         return enhanced_pages
 
     def _find_section_page_for_chapter(self, chapter_id: str, chapter_page: int, pdf) -> int:
-        """Find the section page for a first chapter by looking backward for minimal content"""
+        """Find the section page for a first chapter by looking backward for section indicators"""
 
         if self.verbose:
             print(f"    🔍 Looking for section page before Chapter {chapter_id} (page {chapter_page})...")
 
-        # Look 1-4 pages back for minimal content (section graphics)
+        # Look 1-4 pages back for section indicators (graphics or Part headers)
         for lookback in range(1, 5):  # Check pages -1, -2, -3, -4
             candidate_page = chapter_page - lookback
 
@@ -302,10 +302,11 @@ class ChapterDetector:
                 # Get text from candidate page (convert to 0-based indexing)
                 text = pdf[candidate_page - 1].get_text()
                 is_minimal = self._is_minimal_content_page(text)
+                is_part_page = self._is_part_section_page(text)
 
                 if self.verbose:
                     lines_count = len([line.strip() for line in text.split('\n') if line.strip()])
-                    print(f"      📄 Page {candidate_page}: {lines_count} lines, minimal={is_minimal}")
+                    print(f"      📄 Page {candidate_page}: {lines_count} lines, minimal={is_minimal}, part_page={is_part_page}")
 
                     # Show first few lines for debugging
                     lines = [line.strip() for line in text.split('\n') if line.strip()]
@@ -315,9 +316,10 @@ class ChapterDetector:
                     else:
                         print(f"        └── Content preview: [EMPTY]")
 
-                if is_minimal:
+                if is_minimal or is_part_page:
                     if self.verbose:
-                        print(f"    ✅ Found section page: {candidate_page} (minimal content)")
+                        section_type = "Part section" if is_part_page else "minimal content"
+                        print(f"    ✅ Found section page: {candidate_page} ({section_type})")
                     return candidate_page
 
             except Exception as e:
@@ -340,6 +342,36 @@ class ChapterDetector:
         # Very strict threshold - graphics pages should have almost no extractable text
         # Usually just page numbers, minimal metadata, or footer text
         return len(lines) <= 2
+    
+    def _is_part_section_page(self, text: str) -> bool:
+        """Check if page contains Part section header (Part I, Part II, etc.)"""
+        
+        if not text or not text.strip():
+            return False
+        
+        # Look for Part section patterns
+        part_patterns = [
+            r'\bPart\s+[IVX]+\b',           # Part I, Part II, Part III, Part IV, Part V
+            r'\bPart\s+[1-9]\b',            # Part 1, Part 2, Part 3
+            r'\bPART\s+[IVX]+\b',           # PART I, PART II (uppercase)
+            r'\bPART\s+[1-9]\b',            # PART 1, PART 2 (uppercase)
+        ]
+        
+        text_upper = text.upper()
+        lines = [line.strip() for line in text.split('\n') if line.strip()]
+        
+        # Check if any line contains a Part pattern
+        for line in lines[:10]:  # Check first 10 lines
+            for pattern in part_patterns:
+                if re.search(pattern, line, re.IGNORECASE):
+                    # Additional validation: Part pages typically have limited content
+                    # Usually just the Part header and maybe a subtitle
+                    if len(lines) <= 15:  # Part pages are usually sparse
+                        if self.verbose:
+                            print(f"        └── Detected Part section: {line}")
+                        return True
+        
+        return False
 
     def _add_chapter_with_override(self, found_pages: dict, chapter_id: str, page_num: int, chapter_type: str) -> bool:
         """Add chapter with override logic"""

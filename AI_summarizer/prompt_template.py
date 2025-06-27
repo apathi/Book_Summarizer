@@ -29,6 +29,7 @@ def get_summarization_prompt(chapter_title: str, chapter_content: str) -> str:
 **COMPLETE EXAMPLE OF DESIRED QUALITY & FORMATTING STYLE:**
 Here's a full example showing the depth, structure, and formatting style I want (from a different chapter):
 
+< Example >
 # 📘 Chapter 4: User Insight
 
 ## 🔑 Core Idea
@@ -273,7 +274,9 @@ Understanding the user's **end-to-end lifecycle** helps uncover less visible pai
 - Follow the 3 I's: Interview, Interpret, Improve
 - Evangelize insights org-wide to build user-centric culture
 
-**CRITICAL INSTRUCTIONS FOR THIS CHAPTER:**
+< / Example > ** End of example **
+
+**CRITICAL INSTRUCTIONS FOR SUMMARIZING A CHAPTER:**
 
 🚨 **ADAPTATION REQUIREMENTS:**
 - **This example shows STYLE and DEPTH only - DO NOT copy this structure**
